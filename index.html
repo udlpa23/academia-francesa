@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia Francesa - Senegal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { background: #378ADD; color: white; padding: 30px; border-radius: 10px; text-align: center; margin-bottom: 30px; }
+        .stats { display: flex; justify-content: center; gap: 40px; margin-top: 20px; }
+        .lessons-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .lesson-card { background: white; padding: 20px; border-radius: 8px; cursor: pointer; border: 2px solid #378ADD; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .lesson-card:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .lesson-card h3 { color: #378ADD; margin-bottom: 10px; }
+        .lesson-card p { color: #666; font-size: 14px; margin-bottom: 5px; }
+        .badge { background: green; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-block; }
+        .lesson-view { background: white; padding: 30px; border-radius: 8px; }
+        .back-btn { background: #666; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
+        .section { margin-bottom: 25px; }
+        .section h3 { color: #333; border-bottom: 2px solid #378ADD; padding-bottom: 8px; margin-bottom: 15px; }
+        .section ul { margin-left: 20px; }
+        .section li { margin-bottom: 8px; line-height: 1.6; color: #555; }
+        .test-container { background: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 30px; border-left: 4px solid #378ADD; }
+        .test-container h4 { color: #333; margin-bottom: 15px; }
+        .test-options { display: grid; gap: 10px; }
+        .test-btn { padding: 12px; border: 2px solid #ddd; border-radius: 5px; cursor: pointer; background: #f0f0f0; transition: all 0.2s; }
+        .test-btn:hover { background: #378ADD; color: white; }
+        .success { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-top: 15px; text-align: center; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="dashboard" class="dashboard">
+            <div class="header">
+                <h1>🎓 Academia Francesa - Senegal</h1>
+                <div class="stats">
+                    <div><strong>Puntos:</strong> <span id="points">0</span></div>
+                    <div><strong>Lecciones:</strong> <span id="completed">0</span>/5</div>
+                </div>
+            </div>
+            <div class="lessons-grid" id="lessonsGrid"></div>
+        </div>
+
+        <div id="lesson" class="lesson-view hidden">
+            <button class="back-btn" onclick="backToDashboard()">← Volver</button>
+            <div id="lessonContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const lessons = [
+            { id: 1, title: "Saludos Básicos", subtitle: "En Dakar, Senegal", duration: "15 min", intro: "¡Hola José Manuel! Hoy aprendemos cómo saludar en francés.", sections: [{ title: "Expresiones Clave", content: ["Bonjour (Buenos días/tardes) - Formal", "Bonsoir (Buenas noches) - Después de las 18h", "Salut (Hola) - Informal", "Ça va? (¿Cómo va?) - Pregunta común", "Ça va bien, merci! (¡Va bien, gracias!)"] }], test: { question: "¿Cuál es la forma más formal de saludar?", options: [{ text: "Bonjour", correct: true }, { text: "Salut", correct: false }, { text: "Hola", correct: false }] } },
+            { id: 2, title: "Tu Presentación", subtitle: "Como Emprendedor Solidario", duration: "15 min", intro: "Aprendemos a presentarte en francés de forma profesional.", sections: [{ title: "Frase de Presentación", content: ["Je m'appelle José Manuel (Me llamo José Manuel)", "Je suis entrepreneur social (Soy emprendedor social)", "Je dirige une entreprise d'insertion (Dirijo una empresa de inserción)", "Je viens des Îles Canaries (Vengo de Islas Canarias)"] }], test: { question: "¿Cómo dices 'Me llamo José Manuel'?", options: [{ text: "Je m'appelle José Manuel", correct: true }, { text: "Mon nom est José Manuel", correct: false }, { text: "Soy José Manuel", correct: false }] } },
+            { id: 3, title: "Números y Dinero", subtitle: "Francos CFA en Senegal", duration: "15 min", intro: "Los números son críticos en negociaciones.", sections: [{ title: "Números del 0 al 20", content: ["0=Zéro, 1=Un, 2=Deux, 3=Trois, 4=Quatre, 5=Cinq", "6=Six, 7=Sept, 8=Huit, 9=Neuf, 10=Dix", "11=Onze, 12=Douze, 13=Treize, 14=Quatorze, 15=Quinze"] }, { title: "Dinero en Senegal", content: ["La moneda: Franc CFA (XOF)", "Ça coûte combien? (¿Cuánto cuesta?)", "C'est trop cher (Es muy caro)"] }], test: { question: "¿Cómo preguntas '¿Cuánto cuesta?'", options: [{ text: "Ça coûte combien?", correct: true }, { text: "Cuanto cuesta?", correct: false }, { text: "C'est le prix?", correct: false }] } },
+            { id: 4, title: "En el Hotel", subtitle: "Senegal - Dakar", duration: "20 min", intro: "Vocabulario útil cuando viajas a Senegal por negocios.", sections: [{ title: "En Recepción", content: ["Je voudrais une chambre (Quisiera una habitación)", "Avec salle de bain privée (Con baño privado)", "Quel est le prix par nuit? (¿Cuál es el precio por noche?)"] }], test: { question: "¿Cómo pides una habitación?", options: [{ text: "Je voudrais une chambre", correct: true }, { text: "Je veux dormir", correct: false }, { text: "Una casa grande", correct: false }] } },
+            { id: 5, title: "El Mercado Senegalés", subtitle: "Negocios en Dakar", duration: "20 min", intro: "Vocabulario para negociar en el mercado de Dakar.", sections: [{ title: "Negociación", content: ["Combien ça coûte? (¿Cuánto cuesta?)", "C'est trop cher (Es muy caro)", "Quel est votre meilleur prix? (¿Cuál es tu mejor precio?)", "C'est un accord! (¡Es un trato!)"] }], test: { question: "¿Cómo dices 'Es muy caro'?", options: [{ text: "C'est trop cher", correct: true }, { text: "Es muy precio", correct: false }, { text: "Mucho dinero", correct: false }] } }
+        ];
+
+        let currentPoints = localStorage.getItem('acadPoints') ? parseInt(localStorage.getItem('acadPoints')) : 0;
+        let completedLessons = localStorage.getItem('acadLessons') ? JSON.parse(localStorage.getItem('acadLessons')) : [];
+
+        function renderDashboard() {
+            document.getElementById('points').textContent = currentPoints;
+            document.getElementById('completed').textContent = completedLessons.length;
+            const grid = document.getElementById('lessonsGrid');
+            grid.innerHTML = lessons.map(lesson => `<div class="lesson-card" onclick="openLesson(${lesson.id - 1})"><h3>${lesson.title}</h3><p>${lesson.subtitle}</p><p style="font-size: 12px; color: #999;">${lesson.duration}</p>${completedLessons.includes(lesson.id) ? '<span class="badge">✓ Completada</span>' : ''}</div>`).join('');
+        }
+
+        function openLesson(idx) {
+            const lesson = lessons[idx];
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('lesson').classList.remove('hidden');
+            let html = `<h2>${lesson.title}</h2><p style="font-style: italic; color: #666; margin-bottom: 20px;">${lesson.intro}</p>`;
+            lesson.sections.forEach(section => { html += `<div class="section"><h3>${section.title}</h3><ul>${section.content.map(item => `<li>${item}</li>`).join('')}</ul></div>`; });
+            html += `<div class="test-container"><h4>${lesson.test.question}</h4><div class="test-options">${lesson.test.options.map((opt, i) => `<button class="test-btn" onclick="checkAnswer(${opt.correct}, ${idx})">${opt.text}</button>`).join('')}</div></div>`;
+            document.getElementById('lessonContent').innerHTML = html;
+        }
+
+        function checkAnswer(correct, idx) {
+            if (correct) {
+                const lesson = lessons[idx];
+                if (!completedLessons.includes(lesson.id)) {
+                    completedLessons.push(lesson.id);
+                    currentPoints += 10;
+                    localStorage.setItem('acadPoints', currentPoints);
+                    localStorage.setItem('acadLessons', JSON.stringify(completedLessons));
+                    document.getElementById('lessonContent').innerHTML += '<div class="success">✅ ¡Correcto! +10 puntos<br><button class="test-btn" onclick="backToDashboard()" style="margin-top: 10px; background: green; color: white;">Volver al inicio</button></div>';
+                }
+            } else { alert('Intenta de nuevo'); }
+        }
+
+        function backToDashboard() {
+            document.getElementById('lesson').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            renderDashboard();
+        }
+
+        renderDashboard();
+    </script>
+</body>
+</html>
