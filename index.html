@@ -99,6 +99,43 @@
         }
 
         renderDashboard();
+        // Registrar Service Worker para notificaciones push
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js').then(reg => {
+    console.log('Service Worker registrado');
+    
+    // Pedir permiso para notificaciones
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+    
+    // Programar notificación diaria a las 6:00 AM
+    function scheduleNotification() {
+      const now = new Date();
+      const notificationTime = new Date();
+      notificationTime.setHours(6, 0, 0, 0);
+      
+      if (now > notificationTime) {
+        notificationTime.setDate(notificationTime.getDate() + 1);
+      }
+      
+      const timeUntilNotification = notificationTime - now;
+      
+      setTimeout(() => {
+        if (Notification.permission === 'granted') {
+          new Notification('🎓 Academia Francesa', {
+            body: '¡Hora de aprender francés! Abre tu lección diaria.',
+            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><text y="144" font-size="144">🎓</text></svg>',
+            tag: 'academia-francesa-daily'
+          });
+        }
+        scheduleNotification();
+      }, timeUntilNotification);
+    }
+    
+    scheduleNotification();
+  });
+}
     </script>
 </body>
 </html>
